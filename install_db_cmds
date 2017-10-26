@@ -1,0 +1,40 @@
+create database hollaback;
+use hollaback;
+
+create table users (
+	uid varchar(36) UNIQUE, 
+	name varchar(20) UNIQUE, 
+	pass varchar(62)
+);
+
+create table que (
+	token varchar(42) UNIQUE,
+	uid varchar(36) not NULL, 
+	comment varchar(1000), 
+	test_name varchar(20), 
+	cust_name varchar(20), 
+	consume INT DEFAULT 0,
+	reply_method int default 0, 
+	visited INT DEFAULT 0,
+	start_que DATETIME not NULL, 
+	end_que DATETIME not NULL
+);
+
+create table visits (
+	token varchar(42),
+	user_agent varchar(100),
+	host_header varchar(100),
+	remote_address varchar(30),
+	forward_for varchar(30),
+	client_ip varchar(100),
+	server_protocol varchar(10),
+	request_method varchar(20),
+	request_scheme varchar(20),
+	date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+	port INT,
+	get blob,
+	post blob
+);
+
+
+grant select,delete,insert,update on hollaback.* to 'holla_user'@'localhost' identified by broke_on_purpose
