@@ -14,5 +14,8 @@ if ( $len !== 2 ){
 $user = $argv[1];
 $pass = readline("Password for " . $user . ": ");
 	
-if ( add_user($user, $pass) )
+$db = new DB();
+$ans = $db-> add_user($user, $pass);
+
+if ($ans)
 	echo "Created user\n";

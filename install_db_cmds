@@ -27,14 +27,12 @@ create table visits (
 	remote_address varchar(30),
 	forward_for varchar(30),
 	client_ip varchar(100),
-	server_protocol varchar(10),
 	request_method varchar(20),
 	request_scheme varchar(20),
 	date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 	port INT,
-	get blob,
-	post blob
+	req blob
 );
 
 
-grant select,delete,insert,update on hollaback.* to 'holla_user'@'localhost' identified by broke_on_purpose
+grant select,delete,insert,update on hollaback.* to 'holla_user'@'localhost' identified by __PASSWORD__; -- broken on purpose

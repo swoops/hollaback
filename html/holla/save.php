@@ -60,12 +60,13 @@ if ( isset($que_json["comment"]) ){
 	}
 }
 
-$ret = enque($que_json);
+$db = new DB();
+$ret = $db->enque($que_json);
 
 if ( $ret === True ){
 	$schema = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://"; 
 	$que_json["Success"] = True;
-	$que_json["url"] = $schema . $SERVERNAME . "/?t=" . $que_json["token"];
+	$que_json["url"] = $schema . $_SERVER["SERVER_NAME"] . "/?t=" . $que_json["token"];
 	echo json_encode($que_json);
 }else{
 	fail($ret, $verbose=True, $code=500);

@@ -1,5 +1,4 @@
 <?php
-include "/opt/hollaback/sec.php";
 function get_token(){
 	// TODO: token in more places
 	if ( isset($_GET["t"]) ){
@@ -21,7 +20,8 @@ if ( $token === False ){
 }
 
 include "/opt/hollaback/sql.php";
-$toke_info = token_check($token);
+$db = new DB();
+$toke_info = $db->token_check($token);
 if ( ! is_array($toke_info) || $toke_info["Success"] !== True){
 	if ($DEBUG ) {
 		printf("[%s:%d] token failed\n", __FILE__, __LINE__);
@@ -30,4 +30,4 @@ if ( ! is_array($toke_info) || $toke_info["Success"] !== True){
 }
 
 // so this is a valid token visit we need to update the database
-token_visit($token);
+$db->token_visit($token);

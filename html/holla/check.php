@@ -34,7 +34,8 @@ if (! isset($token) ){
 	fail("Need token", $verbose=True, $code=403);
 }
 
-$res = token_check($token);
+$db = new DB();
+$res = $db->token_check($token);
 if ( ! is_array($res) )
     fail("return value was not an array???", $verbose=True, $code=403);
 else if ( $res["Success"] !== True )

@@ -23,7 +23,8 @@ if (! (isset( $user ) && isset( $pass ))){
 	exit(0);
 }
 
-$login = check_creds($user, $pass); 
+$db = new DB();
+$login = $db->check_creds($user, $pass); 
 $msg = array("Success" => False);
 
 if ( $login  === True){
