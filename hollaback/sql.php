@@ -31,6 +31,41 @@ class DB {
 		return $this->conn;
 	}
 
+	public function getvisit($token, $num){
+		/*
+		 * returns information for a visit, num coresponding to the visit
+		 * number sorted by date 
+		 */
+
+		$er = array(
+			"Success" => False,
+			"msg" => "don't know"
+		);
+		if ( ! is_int($num) ){
+			$er["msg"] = "num is not int\n" . var_dump($num) . "\ntest";
+			return $er;
+		}
+		$conn = $this->get_conn();
+		$query = $conn->prepare("SELECT * FROM visits WHERE token = ? ORDER BY date ASC LIMIT ?,1;");
+		$query->bind_param("si", $token, $num);
+
+		if(! $query->execute() ){
+			$query->close();
+			return $er;
+		}
+		$res = $query->get_result();
+		if ( $res->num_rows !== 1 ){
+			$er = sprintf("Improper number of rows: %d", $res->num_rows);
+			$query->close();
+			return $er;
+		}
+	   
+		$ret = $res->fetch_array(MYSQLI_ASSOC);
+		$ret["Success"] = True;
+		$this->clean($conn); // clean up the old junk
+		$query->close();
+		return $ret;
+	}
 	public function check_creds($user, $pass){
 		$ret = False;
 		$conn = $this->get_conn();
@@ -51,6 +86,31 @@ class DB {
 		return $ret;
 	}
 
+	public function clean_token($token){
+		$affected = 0;
+		$conn = $this->get_conn();
+		$query = $conn->prepare("delete from que where token=?");
+		$query->bind_param("s", $token);
+		if(!$query->execute() ){
+			return False;
+		}
+		$affected += $query->affected_rows;
+		$query->close();
+
+		$query = $conn->prepare("delete from visits where token=?");
+		$query->bind_param("s", $token);
+		if(!$query->execute() ){
+			return False;
+		}
+		$affected += $query->affected_rows;
+		$query->close();
+
+		if ($affected)
+			$ret = True;
+		else
+			$ret = False;
+		return $ret;
+	}
 	public function clean($consume=False){
 		/* 
 		 * careful using clean($consume=True) because it could delete an event
