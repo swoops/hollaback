@@ -1,4 +1,5 @@
 <?php
+include "/opt/hollaback/payloads.php";
 function get_token(){
 	// TODO: token in more places
 	if ( isset($_GET["t"]) ){
@@ -31,3 +32,26 @@ if ( ! is_array($toke_info) || $toke_info["Success"] !== True){
 
 // so this is a valid token visit we need to update the database
 $db->token_visit($token);
+
+$payid = $toke_info["payid"];
+$payparam = $toke_info["payparam"];
+if ( validate_payload($payid, $payparam) !== True)
+	exit(0);
+
+/* if the payload has been consumed don't run it */
+if ($toke_info["consume"] > 0 && $toke_info["consume"] <= $toke_info["visited"])
+	exit(0);
+
+// do this with the payload.php lib
+switch ($toke_info["payid"]){
+	case 0:
+		/* no payload */
+		exit(0);
+		break;
+	case 1: 
+		/* 302 to the param value */
+		header('Location: ' . $toke_info["payparam"]);
+		break;
+	default:
+		exit(0);
+}

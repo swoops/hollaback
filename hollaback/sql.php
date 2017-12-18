@@ -62,10 +62,11 @@ class DB {
 	   
 		$ret = $res->fetch_array(MYSQLI_ASSOC);
 		$ret["Success"] = True;
-		$this->clean($conn); // clean up the old junk
+		$this->clean(); // clean up the old junk
 		$query->close();
 		return $ret;
 	}
+
 	public function check_creds($user, $pass){
 		$ret = False;
 		$conn = $this->get_conn();
@@ -118,20 +119,27 @@ class DB {
 		*/
 		$conn = $this->get_conn();
 		if ( $consume )
-			$conn->query("DELETE from que where end_que < NOW() or visited >= consume;");
+			$conn->query("DELETE from que where end_que < NOW() or (consume != 0 and visited >= consume );");
 		else
 			$conn->query("DELETE from que where end_que < NOW();");
 		$conn->query("DELETE FROM visits WHERE token NOT IN (SELECT TOKEN FROM que);");
 	}
 
 	public function enque($q){
+		// if something that should be an int isn't set it to 0
+		foreach(array("consume", "payid", "reply_method") as $i){
+			if ( !is_int($q[$i]) ){
+				$q[$i] = 0;
+			}
+		}
 		$conn = $this->get_conn();
-		$query = $conn->prepare("INSERT INTO que (token, uid, comment, test_name, cust_name, consume, reply_method, start_que, end_que) VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW() + INTERVAL ? SECOND )");
+		$query = $conn->prepare("INSERT INTO que (token, uid, comment, test_name, cust_name, consume, payid, payparam, reply_method, start_que, end_que) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW() + INTERVAL ? SECOND )");
 
 		$ttl = intval($q["ttl"]);
-		$query->bind_param("sssssiii", 
+		$query->bind_param("sssssiisii", 
 			$q["token"], $q["uid"], $q["comment"], $q["test_name"],
-			$q["cust_name"], $q["consume"],$q["reply_method"], $ttl
+			$q["cust_name"], $q["consume"], $q["payid"],
+			$q["payparam"], $q["reply_method"], $ttl
 		);
 
 		if(! $query->execute() ){
@@ -213,35 +221,20 @@ class DB {
 		}
 		$res = $query->get_result();
 		if ( $res->num_rows !== 1 ){
-			$er = sprintf("Improper number of rows: %d", $res->num_rows);
+			$er = array(
+				"Success" => False,
+				"msg" => sprintf("Improper number of rows: %d", $res->num_rows)
+			);
 			$query->close();
 			return $er;
 		}
 	   
 		$ret = $res->fetch_array(MYSQLI_ASSOC);
 		$ret["Success"] = True;
-		$this->clean($conn); // clean up the old junk
+		$this->clean(); // clean up the old junk
 		$query->close();
 		return $ret;
 	}
-
-	/*
-	function list_que($uid){
-		$conn = get_conn();
-		clean($conn); // clean out the old before asking for current
-		$query = $conn->prepare("select * from que where uid='?'");
-		$query->bind_param("s", $uid);
-
-		if(! $query->execute() ){
-			$er = $query->error_list[0]["error"] . "\n";
-			$query->close();
-			return $er;
-		}
-		echo $query->fetchAll();
-		$query->close();
-		return True;
-	}
-	*/
 
 	public function add_user($user, $pass){
 		if ( strlen($user) >= 20 ){
