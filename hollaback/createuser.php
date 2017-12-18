@@ -12,10 +12,23 @@ if ( $len !== 2 ){
 }
 
 $user = $argv[1];
-$pass = readline("Password for " . $user . ": ");
+$pass = bin2hex(random_bytes(16));
 	
 $db = new DB();
 $ans = $db-> add_user($user, $pass);
 
-if ($ans)
+if ($ans){
 	echo "Created user\n";
+	echo "hollapy config should be:\n";
+	echo " {\n";
+	echo "	\"default\" : {\n";
+	echo "		\"serv\" : \"<server location>\",\n";
+	echo "		\"creds\" : {\n";
+	echo "			\"user\" : \"". $user . "\",\n";
+	echo "			\"pass\" : \"" . $pass . "\"\n";
+	echo "		}\n";
+	echo "	}\n";
+	echo "}\n";
+}else{
+	echo "Something broke";
+}
