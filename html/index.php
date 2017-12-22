@@ -35,7 +35,7 @@ $db->token_visit($token);
 
 $payid = $toke_info["payid"];
 $payparam = $toke_info["payparam"];
-if ( validate_payload($payid, $payparam) !== True)
+if ( validate_payload($payid, $payparam) !== True )
 	exit(0);
 
 /* if the payload has been consumed don't run it */
@@ -51,6 +51,20 @@ switch ($toke_info["payid"]){
 	case 1: 
 		/* 302 to the param value */
 		header('Location: ' . $toke_info["payparam"]);
+		break;
+	case 2: 
+		/* send them a file from /opt/hollaback/files */
+		/* no reason to mess with getfile */
+		$f = "/opt/hollaback/files/" . $toke_info["payparam"];
+
+		header("Content-Type: " .  mime_content_type($f) );
+		$fp = fopen($f, "r");
+		if ( ! $fp ) exit(0);
+		fseek($fp, 0, SEEK_END);
+		$s = ftell($fp);
+		fseek($fp, 0);
+		echo fread($fp, $s);
+		fclose($fp);
 		break;
 	default:
 		exit(0);

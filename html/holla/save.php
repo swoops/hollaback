@@ -36,8 +36,13 @@ if ( $que_json["ttl"] === 0 ){
 	fail("Invalid ttl", $verbose=True, $code=500);
 }
 
-if ( validate_payload($que_json["payid"], $que_json["payparam"]) !== True )
-	fail("invalid payload", $verbose=True, $code=500);
+$paytest = validate_payload($que_json["payid"], $que_json["payparam"]);
+if ( $paytest !== True ){
+    if ( $paytest === False  )
+        fail("invalid payload", $verbose=True, $code=500);
+    else
+        fail("invalid payload: " . $paytest, $verbose=True, $code=500);
+}
 
 if ( isset($que_json["comment"]) ){
 	if ( strlen($que_json["comment"]) > 1000 ){
